@@ -37,6 +37,55 @@ body {
   overflow: hidden;
 }
 
+/* ─── Hamburger ─── */
+.menu-btn {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--sidebar-bg);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.menu-btn span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 1px;
+  position: relative;
+}
+
+.menu-btn span::before,
+.menu-btn span::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 1px;
+  left: 0;
+}
+
+.menu-btn span::before { top: -6px; }
+.menu-btn span::after { top: 6px; }
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 149;
+}
+
 /* ─── Sidebar ─── */
 aside {
   width: 280px;
@@ -47,6 +96,29 @@ aside {
   flex-direction: column;
   height: 100vh;
 }
+
+/* ─── Prev / Next Nav ─── */
+.problem-nav {
+  display: none;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.problem-nav button {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.problem-nav button:active { background: #f3f4f6; }
+.problem-nav button:disabled { opacity: 0.35; cursor: default; }
 
 .sidebar-header {
   padding: 28px 24px 20px;
@@ -435,22 +507,73 @@ main::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 }
 
 @media (max-width: 768px) {
-  aside { width: 220px; min-width: 220px; }
-  main { padding: 32px 28px 60px; }
+  .menu-btn { display: flex; }
+
+  aside {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+  }
+
+  aside.open { transform: translateX(0); }
+  aside.open ~ .sidebar-overlay { display: block; }
+
+  main { padding: 64px 20px 40px; }
   .problem-title { font-size: 22px; }
-  .responses-grid { grid-template-columns: 1fr 1fr; }
+  .problem-prompt { font-size: 15px; }
+  .responses-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .response-card { padding: 18px 12px 16px; }
+  .problem-nav { display: flex; }
+
+  /* Tap-friendly thought bubbles */
+  .hover-hint { display: none; }
+  .response-card { cursor: pointer; }
+  .response-card .thought-bubble {
+    width: 260px;
+  }
+
+  /* Reset edge card positioning for mobile */
+  .response-card:first-child .thought-bubble,
+  .response-card:last-child .thought-bubble,
+  .response-card .thought-bubble {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(6px) scale(0.97);
+  }
+  .response-card:first-child:hover .thought-bubble,
+  .response-card:last-child:hover .thought-bubble,
+  .response-card:hover .thought-bubble {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  .response-card .thought-bubble::before,
+  .response-card .thought-bubble::after {
+    left: 50%;
+    right: auto;
+  }
+
+  .thought-bubble.show {
+    opacity: 1 !important;
+    transform: translateX(-50%) translateY(0) scale(1) !important;
+    pointer-events: auto !important;
+  }
 }
 </style>
 </head>
 <body>
 
-<aside>
+<button class="menu-btn" id="menuBtn" aria-label="Open menu"><span></span></button>
+<aside id="sidebar">
   <div class="sidebar-header">
     <h1>Absurd Trolley Problems</h1>
     <p>Human vs AI Analysis</p>
   </div>
   <nav id="nav"></nav>
 </aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <main id="main"></main>
 
@@ -752,6 +875,7 @@ function renderNav() {
       renderNav();
       renderMain();
       window.location.hash = `#${currentIndex + 1}`;
+      document.getElementById('sidebar').classList.remove('open');
     });
   });
 }
@@ -861,10 +985,50 @@ function renderMain() {
         `;
       }).join('')}
     </div>
+
+    <div class="problem-nav">
+      <button id="prevBtn" ${currentIndex === 0 ? 'disabled' : ''}>← Prev</button>
+      <button id="nextBtn" ${currentIndex === DATA.length - 1 ? 'disabled' : ''}>Next →</button>
+    </div>
   `;
 
   main.scrollTop = 0;
+
+  // Prev / Next buttons
+  document.getElementById('prevBtn')?.addEventListener('click', () => navigate(-1));
+  document.getElementById('nextBtn')?.addEventListener('click', () => navigate(1));
+
+  // Tap-to-show reasoning on mobile
+  main.querySelectorAll('.response-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (window.innerWidth > 768) return;
+      const bubble = card.querySelector('.thought-bubble');
+      const wasOpen = bubble.classList.contains('show');
+      main.querySelectorAll('.thought-bubble.show').forEach(b => b.classList.remove('show'));
+      if (!wasOpen) bubble.classList.add('show');
+    });
+  });
 }
+
+function navigate(dir) {
+  const next = currentIndex + dir;
+  if (next < 0 || next >= DATA.length) return;
+  currentIndex = next;
+  renderNav();
+  renderMain();
+  window.location.hash = `#${currentIndex + 1}`;
+  document.querySelector('.nav-item.active')?.scrollIntoView({ block: 'nearest' });
+}
+
+// ─── Sidebar toggle ───
+const sidebar = document.getElementById('sidebar');
+const menuBtn = document.getElementById('menuBtn');
+const overlay = document.getElementById('sidebarOverlay');
+
+function closeSidebar() { sidebar.classList.remove('open'); }
+
+menuBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+overlay.addEventListener('click', closeSidebar);
 
 // ─── Keyboard Nav ───
 document.addEventListener('keydown', (e) => {
