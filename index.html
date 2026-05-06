@@ -529,36 +529,49 @@ main::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
   .response-card { padding: 18px 12px 16px; }
   .problem-nav { display: flex; }
 
-  /* Tap-friendly thought bubbles */
+  /* Tap-friendly thought bubbles — inline below card */
   .hover-hint { display: none; }
+  .tap-hint {
+    display: block !important;
+    font-size: 10px;
+    color: #c0c4cc;
+    margin-top: 10px;
+  }
   .response-card { cursor: pointer; }
-  .response-card .thought-bubble {
-    width: 260px;
+
+  .response-card .thought-bubble,
+  .response-card:first-child .thought-bubble,
+  .response-card:last-child .thought-bubble {
+    position: static;
+    transform: none;
+    width: auto;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 14px;
+    margin-top: 0;
+    box-shadow: none;
+    border-radius: 10px;
+    background: #f9fafb;
+    transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease, margin-top 0.3s ease;
   }
 
-  /* Reset edge card positioning for mobile */
-  .response-card:first-child .thought-bubble,
-  .response-card:last-child .thought-bubble,
-  .response-card .thought-bubble {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%) translateY(6px) scale(0.97);
-  }
-  .response-card:first-child:hover .thought-bubble,
-  .response-card:last-child:hover .thought-bubble,
-  .response-card:hover .thought-bubble {
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
   .response-card .thought-bubble::before,
   .response-card .thought-bubble::after {
-    left: 50%;
-    right: auto;
+    display: none;
+  }
+
+  .response-card:hover .thought-bubble {
+    opacity: 0;
+    max-height: 0;
+    transform: none;
   }
 
   .thought-bubble.show {
     opacity: 1 !important;
-    transform: translateX(-50%) translateY(0) scale(1) !important;
-    pointer-events: auto !important;
+    max-height: 500px !important;
+    padding: 14px !important;
+    margin-top: 12px !important;
   }
 }
 </style>
@@ -972,6 +985,7 @@ function renderMain() {
             <div class="card-name">${c.name}</div>
             <span class="answer-badge ${cls}">${c.answer}</span>
             <div class="hover-hint">hover for reasoning</div>
+            <div class="tap-hint" style="display:none">tap for reasoning</div>
             <div class="thought-bubble">
               <div class="bubble-reasoning">${c.reasoning}</div>
               ${c.notes ? `
