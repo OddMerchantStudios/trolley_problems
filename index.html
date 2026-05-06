@@ -531,12 +531,19 @@ main::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
   }
   .response-card { cursor: pointer; }
 
+  .thought-bubble,
   .response-card .thought-bubble,
   .response-card:first-child .thought-bubble,
-  .response-card:last-child .thought-bubble {
-    position: static;
-    transform: none;
-    width: auto;
+  .response-card:last-child .thought-bubble,
+  .response-card:hover .thought-bubble,
+  .response-card:first-child:hover .thought-bubble,
+  .response-card:last-child:hover .thought-bubble {
+    position: static !important;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: auto !important;
     opacity: 0;
     max-height: 0;
     overflow: hidden;
@@ -545,18 +552,13 @@ main::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
     box-shadow: none;
     border-radius: 10px;
     background: #f9fafb;
+    pointer-events: auto;
     transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease, margin-top 0.3s ease;
   }
 
   .response-card .thought-bubble::before,
   .response-card .thought-bubble::after {
-    display: none;
-  }
-
-  .response-card:hover .thought-bubble {
-    opacity: 0;
-    max-height: 0;
-    transform: none;
+    display: none !important;
   }
 
   .thought-bubble.show {
