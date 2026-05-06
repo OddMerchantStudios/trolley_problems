@@ -442,36 +442,28 @@ main::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
   font-style: italic;
 }
 
-/* Adjust bubble position for edge cards */
-.response-card:first-child .thought-bubble {
-  left: 0;
-  transform: translateX(0) translateY(6px) scale(0.97);
-}
-.response-card:first-child:hover .thought-bubble {
-  transform: translateX(0) translateY(0) scale(1);
-}
-.response-card:first-child .thought-bubble::before {
-  left: 30px;
-}
-.response-card:first-child .thought-bubble::after {
-  left: 30px;
-}
+/* Adjust bubble position for edge cards (desktop only) */
+@media (min-width: 769px) {
+  .response-card:first-child .thought-bubble {
+    left: 0;
+    transform: translateX(0) translateY(6px) scale(0.97);
+  }
+  .response-card:first-child:hover .thought-bubble {
+    transform: translateX(0) translateY(0) scale(1);
+  }
+  .response-card:first-child .thought-bubble::before { left: 30px; }
+  .response-card:first-child .thought-bubble::after { left: 30px; }
 
-.response-card:last-child .thought-bubble {
-  left: auto;
-  right: 0;
-  transform: translateX(0) translateY(6px) scale(0.97);
-}
-.response-card:last-child:hover .thought-bubble {
-  transform: translateX(0) translateY(0) scale(1);
-}
-.response-card:last-child .thought-bubble::before {
-  left: auto;
-  right: 25px;
-}
-.response-card:last-child .thought-bubble::after {
-  left: auto;
-  right: 28px;
+  .response-card:last-child .thought-bubble {
+    left: auto;
+    right: 0;
+    transform: translateX(0) translateY(6px) scale(0.97);
+  }
+  .response-card:last-child:hover .thought-bubble {
+    transform: translateX(0) translateY(0) scale(1);
+  }
+  .response-card:last-child .thought-bubble::before { left: auto; right: 25px; }
+  .response-card:last-child .thought-bubble::after { left: auto; right: 28px; }
 }
 
 /* Match indicator */
